@@ -1,9 +1,12 @@
 #include "deblocking_common.h"
 #include "macros.h"
+#include "deblock_msa.h"
 
 //  C code only
-void DeblockLumaLt4_c (uint8_t* pPix, int32_t iStrideX, int32_t iStrideY, int32_t iAlpha, int32_t iBeta,
-                       int8_t* pTc) {
+void DeblockLumaLt4_c (uint8_t* pPix, int32_t iStrideX, int32_t iStrideY, int32_t iAlpha, int32_t iBeta, int8_t* pTc) {
+#ifdef MSA_DEBLOCK
+    deblock_luma_msa(pPix, iStrideX, iStrideY, iAlpha, iBeta, pTc, 1);
+#else
   for (int32_t i = 0; i < 16; i++) {
     int32_t iTc0 = pTc[i >> 2];
     if (iTc0 >= 0) {
@@ -35,8 +38,12 @@ void DeblockLumaLt4_c (uint8_t* pPix, int32_t iStrideX, int32_t iStrideY, int32_
     }
     pPix += iStrideY;
   }
+#endif //MSA_DEBLOCK 
 }
 void DeblockLumaEq4_c (uint8_t* pPix, int32_t iStrideX, int32_t iStrideY, int32_t iAlpha, int32_t iBeta) {
+#ifdef MSA_DEBLOCK
+    deblock_luma_msa(pPix, iStrideX, iStrideY, iAlpha, iBeta, 0, 4);
+#else
   int32_t p0, p1, p2, q0, q1, q2;
   int32_t iDetaP0Q0;
   bool bDetaP1P0, bDetaQ1Q0;
@@ -77,6 +84,7 @@ void DeblockLumaEq4_c (uint8_t* pPix, int32_t iStrideX, int32_t iStrideY, int32_
     }
     pPix += iStrideY;
   }
+#endif //MSA_DEBLOCK
 }
 void DeblockLumaLt4V_c (uint8_t* pPix, int32_t iStride, int32_t iAlpha, int32_t iBeta, int8_t* tc) {
   DeblockLumaLt4_c (pPix, iStride, 1, iAlpha, iBeta, tc);
@@ -90,8 +98,10 @@ void DeblockLumaEq4V_c (uint8_t* pPix, int32_t iStride, int32_t iAlpha, int32_t 
 void DeblockLumaEq4H_c (uint8_t* pPix, int32_t iStride, int32_t iAlpha, int32_t iBeta) {
   DeblockLumaEq4_c (pPix, 1, iStride, iAlpha, iBeta);
 }
-void DeblockChromaLt4_c (uint8_t* pPixCb, uint8_t* pPixCr, int32_t iStrideX, int32_t iStrideY, int32_t iAlpha,
-                         int32_t iBeta, int8_t* pTc) {
+void DeblockChromaLt4_c (uint8_t* pPixCb, uint8_t* pPixCr, int32_t iStrideX, int32_t iStrideY, int32_t iAlpha, int32_t iBeta, int8_t* pTc) {
+#ifdef MSA_DEBLOCK
+    deblock_chroma_msa(pPixCb,  pPixCr, iStrideX, iStrideY, iAlpha, iBeta, pTc, 1);
+#else
   int32_t p0, p1, q0, q1, iDeta;
   bool bDetaP0Q0, bDetaP1P0, bDetaQ1Q0;
 
@@ -131,9 +141,12 @@ void DeblockChromaLt4_c (uint8_t* pPixCb, uint8_t* pPixCr, int32_t iStrideX, int
     pPixCb += iStrideY;
     pPixCr += iStrideY;
   }
+#endif // MSA_DEBLOCK
 }
-void DeblockChromaEq4_c (uint8_t* pPixCb, uint8_t* pPixCr, int32_t iStrideX, int32_t iStrideY, int32_t iAlpha,
-                         int32_t iBeta) {
+void DeblockChromaEq4_c (uint8_t* pPixCb, uint8_t* pPixCr, int32_t iStrideX, int32_t iStrideY, int32_t iAlpha, int32_t iBeta) {
+#ifdef MSA_DEBLOCK
+    deblock_chroma_msa(pPixCb,  pPixCr, iStrideX, iStrideY, iAlpha, iBeta, 0, 4);
+#else
   int32_t p0, p1, q0, q1;
   bool bDetaP0Q0, bDetaP1P0, bDetaQ1Q0;
   for (int32_t i = 0; i < 8; i++) {
@@ -165,6 +178,7 @@ void DeblockChromaEq4_c (uint8_t* pPixCb, uint8_t* pPixCr, int32_t iStrideX, int
     pPixCr += iStrideY;
     pPixCb += iStrideY;
   }
+#endif // MSA_DEBLOCK
 }
 void DeblockChromaLt4V_c (uint8_t* pPixCb, uint8_t* pPixCr, int32_t iStride, int32_t iAlpha, int32_t iBeta,
                           int8_t* tc) {

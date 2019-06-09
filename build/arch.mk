@@ -30,14 +30,32 @@ CFLAGS += -DHAVE_NEON_AARCH64
 endif
 endif
 
-#for loongson
+#for loongson & i6400 (samurai)
 ifneq ($(filter mips mips64, $(ARCH)),)
+
 ifeq ($(USE_ASM), Yes)
+ifeq ($(LOONGSON3A), "loongson3a")
 ASM_ARCH = mips
 ASMFLAGS += -I$(SRC_PATH)codec/common/mips/
 LOONGSON3A = $(shell g++ -dM -E - < /dev/null | grep '_MIPS_TUNE ' | cut -f 3 -d " ")
-ifeq ($(LOONGSON3A), "loongson3a")
 CFLAGS += -DHAVE_MMI
 endif
+endif
+
+ifeq ($(SAMURAI), Yes)
+CC = mips-img-linux-gnu-gcc
+CXX = mips-img-linux-gnu-g++
+#AR = mips-img-linux-gnu-ar
+LDFLAGS = -EL -mabi=64 -static
+CFLAGS += -Wall -EL -mmsa -mabi=64 -march=i6400 
+CXXFLAGS += -Wall -EL -mmsa -mabi=64 -march=i6400
+
+ifeq ($(MSA_DEBLOCK), Yes)
+CFLAGS += -DMSA_DEBLOCK
+INCLUDES += -DMSA_DEBLOCK
+LDFLAGS += -L$(SRC_PATH)codec/custom_deblocking_filter/deblocking_filter/ -ldeblock
+INCLUDES += -I$(SRC_PATH)codec/custom_deblocking_filter/deblocking_filter/
+endif
+
 endif
 endif

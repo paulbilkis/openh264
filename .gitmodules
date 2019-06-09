@@ -1,0 +1,3 @@
+[submodule "codec/custom_deblocking_filter"]
+	path = codec/custom_deblocking_filter
+	url = git@bitbucket.org:pavelbilkis/bachelor-thesis-h264-mips.git
