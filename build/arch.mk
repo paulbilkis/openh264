@@ -52,7 +52,12 @@ CXXFLAGS += -Wall -EL -mmsa -mabi=64 -march=i6400
 
 ifeq ($(MSA_DEBLOCK), Yes)
 CFLAGS += -DMSA_DEBLOCK
-INCLUDES += -DMSA_DEBLOCK
+CXXFLAGS += -DMSA_DEBLOCK
+ifeq ($(MSA_DEBLOCK_REFERENCE), Yes)
+CFLAGS += -DMSA_DEBLOCK_REFERENCE
+CXXFLAGS += -DMSA_DEBLOCK_REFERENCE
+endif
+
 LDFLAGS += -L$(SRC_PATH)codec/custom_deblocking_filter/deblocking_filter/ -ldeblock
 INCLUDES += -I$(SRC_PATH)codec/custom_deblocking_filter/deblocking_filter/
 endif
